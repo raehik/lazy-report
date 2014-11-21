@@ -1,25 +1,27 @@
 #!/usr/bin/env ruby
 #
-# Generate a random report for a student.
+# Generate a report summary for a student.
 #
 
 class Report
-  @test = 1
   attr_reader :name
 
   def initialize(name, gender)
     @name = name
     set_pronouns(gender)
 
-    @adj_good = IO.readlines("adj-good")
-    @adj_bad = IO.readlines("adj-bad")
+    # put this where?!
+    path_parts="parts"
+    path_sentences="sentences"
 
-    @improvement = ["be more active in lessons", "hand in work on time", "put more effort into the lesson", "tryharder"]
+    # simple 'building blocks' for a sentence
+    @adj_good = IO.readlines("#{path_parts}/adj-good")
+    @adj_bad = IO.readlines("#{path_parts}/adj-bad")
 
-    @sentence_good = ["#{@name} participates actively in the lesson", "#{@name} is always very active in lessons"]
-    @sentence_bad = ["#{pronoun("s")} has on occasion been quite rude", "#{pronoun("s")} does have a tendency to arrive late to lessons -- this must be fixed, please!!"]
-
-    @sentence_improvement = [ "#{@name} should try to #{improvement}", "#{pronoun("s")} needs to #{improvement}"]
+    # fully constructed sentences
+    @improvements = parse("#{path_sentences}/improvements")
+    @goods = parse("#{path_sentences}/sentences_good")
+    @bads = parse("#{path_sentences}/sentences_bad")
   end
 
   def set_pronouns(gender)
@@ -49,6 +51,14 @@ class Report
     end
   end
 
+  def parse(file)
+    arr = Array.new
+    File.open(file).each do |line|
+      arr << line.gsub("%NAME%", @name).gsub("%PRONOUN_S%", pronoun("s")).gsub("%PRONOUN_O%", pronoun("o")).gsub("%PRONOUN_G%", pronoun("g"))
+    end
+    return arr
+  end
+
   def adj_good
     @adj_good.sample
   end
@@ -65,14 +75,12 @@ class Report
     @improvement.sample
   end
 
-  def sentence_improvement
-    @sentence_improvement.sample
+  def improvements
+    @improvements.sample
   end
 end
 
 report = Report.new("Raehik", "m")
 puts report.pronoun("s")
 puts report.adj_good
-puts report.sentence_good
-puts report.sentence_bad
-puts report.sentence_improvement
+puts report.improvements
